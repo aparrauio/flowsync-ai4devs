@@ -60,6 +60,24 @@ const routes = {
     tokens: [{"old":"/api/v1/tasks/:id/due-date","type":0,"val":"api","end":""},{"old":"/api/v1/tasks/:id/due-date","type":0,"val":"v1","end":""},{"old":"/api/v1/tasks/:id/due-date","type":0,"val":"tasks","end":""},{"old":"/api/v1/tasks/:id/due-date","type":1,"val":"id","end":""},{"old":"/api/v1/tasks/:id/due-date","type":0,"val":"due-date","end":""}],
     types: placeholder as Registry['tasks.task_due_dates.update']['types'],
   },
+  'openapi.html': {
+    methods: ["GET","HEAD"],
+    pattern: '/api',
+    tokens: [{"old":"/api","type":0,"val":"api","end":""}],
+    types: placeholder as Registry['openapi.html']['types'],
+  },
+  'openapi.json': {
+    methods: ["GET","HEAD"],
+    pattern: '/api.json',
+    tokens: [{"old":"/api.json","type":0,"val":"api.json","end":""}],
+    types: placeholder as Registry['openapi.json']['types'],
+  },
+  'openapi.yaml': {
+    methods: ["GET","HEAD"],
+    pattern: '/api.yaml',
+    tokens: [{"old":"/api.yaml","type":0,"val":"api.yaml","end":""}],
+    types: placeholder as Registry['openapi.yaml']['types'],
+  },
 } as const satisfies Record<string, AdonisEndpoint>
 
 export { routes }
