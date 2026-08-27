@@ -67,8 +67,11 @@ export default class TaskDueDatesController {
   })
   @ApiResponse({
     status: 404,
-    description: 'No existe ninguna tarea con ese identificador.',
-    schema: { allOf: [{ $ref: '#/components/schemas/ApiError' }] },
+    description:
+      'No existe ninguna tarea con ese identificador. Lo lanza `findOrFail()` y lo atiende ' +
+      'el handler genérico, así que es el único error de la capability que no llega con la ' +
+      'forma { errors: [...] }.',
+    schema: { allOf: [{ $ref: '#/components/schemas/FrameworkError' }] },
   })
   @ApiResponse({
     status: 422,

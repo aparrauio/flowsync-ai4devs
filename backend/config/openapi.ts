@@ -106,6 +106,21 @@ export default defineConfig({
         },
 
         /**
+         * El error que devuelve el handler genérico de AdonisJS, que **no** pasa
+         * por el serializer de `providers/api_provider.ts` y por eso no tiene la
+         * forma `{ errors: [...] }` del resto de la API.
+         *
+         * Es lo que sale de un `findOrFail()` sin fila. En producción es solo
+         * esto; en desarrollo, con el debug del handler activo, la respuesta
+         * añade traza y fuente, pero `message` sigue estando.
+         */
+        FrameworkError: {
+          type: 'object',
+          properties: { message: { type: 'string' } },
+          required: ['message'],
+        },
+
+        /**
          * El formato de error de toda la API. `field` y `rule` solo viajan en
          * los errores de validación, que son los que se pintan bajo su campo.
          */

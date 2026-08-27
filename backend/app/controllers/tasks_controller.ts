@@ -1,4 +1,4 @@
-import Task, { DEFAULT_LIST_STATUSES, TASK_STATUSES } from '#models/task'
+import Task, { DEFAULT_LIST_STATUSES } from '#models/task'
 import {
   createTaskValidator,
   listTasksValidator,
@@ -41,13 +41,18 @@ export default class TasksController {
       'responsable, y nunca con su fecha de vencimiento: para eso está la consulta de una ' +
       'tarea suelta.',
   })
+  // Sin `enum`, y no por descuido: `listTasksValidator` acepta hoy cualquier
+  // texto, así que declararlo aquí publicaría una validación que no ocurre.
   @ApiQuery({
     name: 'status',
     required: false,
-    enum: [...TASK_STATUSES],
+    schema: { type: 'string' },
     description:
-      'Acota la lista a un único estado. Su ausencia es la vista por defecto —pendientes y ' +
-      'en curso—, que no es lo mismo que pedir todas.',
+      'Acota la lista a un único estado —pending, in_progress o done—. Su ausencia es la ' +
+      'vista por defecto —pendientes y en curso—, que no es lo mismo que pedir todas. ' +
+      'Ojo: un valor que no sea ninguno de los tres **no se rechaza hoy**; devuelve 200 con ' +
+      'una lista vacía, que es una divergencia conocida respecto de la spec y está anotada ' +
+      'en docs/capabilities/tasks/README.md.',
   })
   @ApiResponse({
     status: 200,
@@ -120,8 +125,11 @@ export default class TasksController {
   })
   @ApiResponse({
     status: 404,
-    description: 'No existe ninguna tarea con ese identificador.',
-    schema: { allOf: [{ $ref: '#/components/schemas/ApiError' }] },
+    description:
+      'No existe ninguna tarea con ese identificador. Lo lanza `findOrFail()` y lo atiende ' +
+      'el handler genérico, así que es el único error de la capability que no llega con la ' +
+      'forma { errors: [...] }.',
+    schema: { allOf: [{ $ref: '#/components/schemas/FrameworkError' }] },
   })
   @ApiResponse({
     status: 422,
