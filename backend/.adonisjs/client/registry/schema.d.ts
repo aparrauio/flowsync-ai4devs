@@ -115,4 +115,40 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/task_due_dates_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'openapi.html': {
+    methods: ["GET","HEAD"]
+    pattern: '/api'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'openapi.json': {
+    methods: ["GET","HEAD"]
+    pattern: '/api.json'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'openapi.yaml': {
+    methods: ["GET","HEAD"]
+    pattern: '/api.yaml'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
 }

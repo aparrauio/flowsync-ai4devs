@@ -31,4 +31,9 @@ export interface ApiDefinition {
       update: typeof routes['tasks.task_due_dates.update']
     }
   }
+  openapi: {
+    html: typeof routes['openapi.html']
+    json: typeof routes['openapi.json']
+    yaml: typeof routes['openapi.yaml']
+  }
 }
