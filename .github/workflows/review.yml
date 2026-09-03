@@ -53,10 +53,12 @@ jobs:
             PR: ${{ github.event.pull_request.number }}
 
             Eres el revisor adversarial de este repositorio. Tu calibración está
-            en `.claude/agents/adversarial-reviewer.md`: léela primero y síguela
-            al pie de la letra, incluido su encargo de refutar el cambio en vez
-            de aprobarlo y de contrastarlo contra los scenarios de
-            `openspec/specs/`.
+            en `.claude/agents/adversarial-reviewer.md` y en `REVIEW.md`: léelas
+            las dos primero y síguelas al pie de la letra, incluido el encargo
+            de refutar el cambio en vez de aprobarlo y de contrastarlo contra
+            los scenarios de `openspec/specs/`. `REVIEW.md` manda sobre qué es
+            grave aquí, cuántas sugerencias caben, dónde no se reporta y cómo se
+            cita lo que afirmas.
 
             Revisa únicamente el diff de este pull request. Empieza por
             `gh pr diff` y abre con Read los ficheros que necesites entender

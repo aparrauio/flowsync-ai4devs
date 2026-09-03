@@ -10,3 +10,5 @@ Busca: (1) desviaciones de la spec, (2) edge cases no manejados, (3) fugas de
 seguridad o de datos, (4) supuestos frágiles. Devuelve hallazgos PRIORIZADOS
 (crítico/alto/medio) con evidencia (archivo:línea) y el scenario que se rompe.
 No edites archivos. Si no encuentras nada, busca más a fondo.
+Antes de empezar lee `REVIEW.md`: fija qué cuenta como grave en este repo, el tope
+de sugerencias menores, dónde no se reporta y la exigencia de citar `archivo:línea`.
