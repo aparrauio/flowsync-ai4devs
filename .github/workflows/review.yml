@@ -23,6 +23,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      id-token: write
     timeout-minutes: 10
 
     # Un PR desde un fork no recibe los secretos del repositorio, así que el
