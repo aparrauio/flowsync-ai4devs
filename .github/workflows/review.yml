@@ -1,0 +1,91 @@
+# Lanza el revisor adversarial sobre cada pull request y publica los hallazgos
+# como comentarios en el propio PR. Solo revisa: no edita, no commitea y no
+# aprueba ni bloquea nada por sí mismo.
+#
+# Los pasos manuales que faltan para que esto funcione (el secreto, sobre todo)
+# y el gasto que implica están en docs/ci-revisor.md.
+name: Revisión adversarial
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+# Nada por defecto: el trabajo pide lo suyo.
+permissions: {}
+
+jobs:
+  review:
+    name: adversarial-reviewer
+    runs-on: ubuntu-latest
+    # Leer el código y escribir en el PR. `pull-requests: write` es lo que
+    # sostiene los comentarios en línea: sin él los hallazgos se quedarían en el
+    # registro de ejecución, que es justo lo que no queremos.
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    timeout-minutes: 10
+
+    # Un PR desde un fork no recibe los secretos del repositorio, así que el
+    # revisor se quedaría sin credencial y el trabajo fallaría sin poder hacer
+    # nada. Se salta explícitamente para que ese caso se lea como «no se ha
+    # revisado» y no como «la revisión ha fallado». Está explicado en
+    # docs/ci-revisor.md.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          # Camino de suscripción: token generado con `claude setup-token`.
+          # Si se usa la clave de API de la consola, esta entrada se sustituye
+          # por `anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}`. No son
+          # intercambiables: ver docs/ci-revisor.md.
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          # Comentario de seguimiento en el PR con el progreso de la revisión.
+          track_progress: true
+
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR: ${{ github.event.pull_request.number }}
+
+            Eres el revisor adversarial de este repositorio. Tu calibración está
+            en `.claude/agents/adversarial-reviewer.md` y en `REVIEW.md`: léelas
+            las dos primero y síguelas al pie de la letra, incluido el encargo
+            de refutar el cambio en vez de aprobarlo y de contrastarlo contra
+            los scenarios de `openspec/specs/`. `REVIEW.md` manda sobre qué es
+            grave aquí, cuántas sugerencias caben, dónde no se reporta y cómo se
+            cita lo que afirmas.
+
+            Revisa únicamente el diff de este pull request. Empieza por
+            `gh pr diff` y abre con Read los ficheros que necesites entender
+            enteros.
+
+            Publica cada hallazgo como comentario en línea sobre la línea a la
+            que se refiere, con su severidad (crítico/alto/medio) y el scenario
+            o la regla que rompe. Deja un único comentario de nivel superior con
+            el resumen. Los hallazgos van al PR: no basta con escribirlos en tu
+            respuesta, porque ahí nadie los lee.
+
+            No edites ficheros, no hagas commit y no propongas parches
+            aplicados: esto es una revisión.
+
+            Lee la salida directa de los comandos. No redirijas la salida a
+            ficheros (nada de `> salida.txt`, `| tee`, ni ficheros temporales
+            para releerlos después): cada redirección te cuesta un turno extra
+            para volver a leer lo que ya tenías delante.
+
+            Si no encuentras nada, busca más a fondo antes de decirlo.
+
+          # `Read`, `Grep` y `Glob` no son opcionales: sin ellas el revisor no
+          # puede abrir ni su fichero de calibración ni un solo fichero del
+          # cambio, y cada intento denegado se lleva un turno de los 40.
+          claude_args: >-
+            --model sonnet
+            --effort medium
+            --max-turns 40
+            --allowedTools "Read,Grep,Glob,mcp__github_inline_comment__create_inline_comment,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*)"

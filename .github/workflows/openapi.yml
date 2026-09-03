@@ -1,0 +1,57 @@
+# Vigila que `docs/api/openapi.json` siga siendo el documento que genera el
+# código. No lo regenera en el repositorio ni lo commitea: si se ha quedado
+# atrás, el trabajo falla y se arregla en local con `npm run openapi:generate`.
+name: OpenAPI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Nada por defecto: cada trabajo pide lo suyo.
+permissions: {}
+
+jobs:
+  check:
+    name: openapi:check
+    runs-on: ubuntu-latest
+    # El trabajo solo lee el código y corre un comando; sin red hacia la API de
+    # GitHub, sin comentar en el PR, sin escribir en el repositorio.
+    permissions:
+      contents: read
+    # Instalar y construir el documento es cosa de un par de minutos: si pasa de
+    # diez es que algo se ha colgado, y colgado no informa de nada.
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+
+    # El comando arranca la aplicación, y `start/env.ts` valida el entorno al
+    # arrancar. Estos valores existen para que esa validación pase: no hay
+    # servidor escuchando ni base de datos que tocar, así que `APP_KEY` no
+    # protege nada aquí y no es —ni debe ser— un secreto del repositorio.
+    env:
+      NODE_ENV: test
+      PORT: '3333'
+      HOST: localhost
+      LOG_LEVEL: info
+      APP_KEY: ci-openapi-check-not-a-secret
+      APP_URL: http://localhost:3333
+      SESSION_DRIVER: memory
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # El checkout no deja el token en `.git/config`: nada de lo que viene
+          # después necesita hablar con GitHub.
+          persist-credentials: false
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+
+      - run: npm run openapi:check

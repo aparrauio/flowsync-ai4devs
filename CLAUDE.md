@@ -24,7 +24,11 @@ npm test                                        # node ace test
 npm run lint                                    # eslint
 npm run format                                  # prettier --write
 npm run typecheck                               # tsc --noEmit
+npm run openapi:generate                        # escribe docs/api/openapi.json
+npm run openapi:check                           # falla si ese fichero no coincide con el código
 ```
+
+`openapi:generate` construye el mismo documento que se sirve en `/api.json` y lo vuelca en `docs/api/openapi.json`. `openapi:check` lo regenera en un directorio temporal, lo compara con el versionado y sale con código distinto de cero enumerando las diferencias: solo compara, nunca reescribe el fichero versionado. Los dos son comandos ace (`backend/commands/`), así que también valen `node ace openapi:generate` y `node ace openapi:check`.
 
 Tests (Japa). Dos suites declaradas en `adonisrc.ts`: `unit` (`tests/unit/**/*.spec.ts`, timeout 2s) y `functional` (`tests/functional/**/*.spec.ts`, timeout 30s). Hoy solo hay tests **functional de `auth`** (`tests/functional/auth/`): registro, login, sesión e iniciales. **`tests/unit/` no existe**, y la capability `tasks` no tiene ni un test.
 
@@ -129,6 +133,6 @@ La URL de la API sale de `VITE_API_URL` (ver `frontend/.env.example`); por defec
 ## Reglas de proceso
 - La rama es por unidad de trabajo, no por petición. Antes de tocar código, mira en qué rama estás: si ya es una rama de trabajo —cualquiera que no sea `main` ni una `sN/*`—, sigue en ella en vez de crear otra. Solo desde `main` o desde una `sN/*` se crea una nueva (`git checkout -b feat/<slug>`). Nunca commitear directo en `main` ni en una `sN/*`.
 - El commit sí es por petición: al cerrar cada una, usar la skill `/commit`.
-- Un cambio que toque rutas, controladores, validadores o transformers de una capability se cierra en el mismo commit con el documento OpenAPI y el README de esa capability al día. El documento se construye en cada petición y no hay fichero que generar, así que lo que se commitea es el diff regenerado de `.adonisjs/`; el README es `docs/capabilities/<nombre>/README.md`.
+- Un cambio que toque rutas, controladores, validadores o transformers de una capability se cierra en el mismo commit con el documento OpenAPI y el README de esa capability al día. El documento vive en `docs/api/openapi.json`: se regenera con `npm run openapi:generate` desde `backend/` y se commitea junto al cambio, además del diff regenerado de `.adonisjs/`. `npm run openapi:check` falla si el fichero versionado se ha quedado atrás, y lo corre además CI (`.github/workflows/openapi.yml`) en cada pull request y en cada push a `main`. El README es `docs/capabilities/<nombre>/README.md`.
 - `gh pr create` (con una descripción completa de los cambios en el cuerpo del PR) y el pase del subagente `adversarial-reviewer` sobre ese PR van **una sola vez, al terminar la unidad de trabajo**, no al cerrar cada petición. El review adversarial es lo último, antes de dar la unidad por terminada.
 - Cuando abras el PR, no repitas ese resumen en el chat: la sesión se va a perder, el PR no. Responde solo con la URL del PR.
